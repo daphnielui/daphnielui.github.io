@@ -306,3 +306,34 @@ button:hover {
         align-items: center;
     }
 }
+/* 食物分析結果樣式 */
+.analysis-result {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 8px;
+}
+
+.analysis-result h3 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.portion-input {
+    margin-top: 15px;
+}
+
+.portion-input input {
+    padding: 5px;
+    margin: 0 10px;
+    width: 80px;
+}
+
+.portion-input button {
+    padding: 5px 10px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
