@@ -107,6 +107,47 @@ function updateWaterUI() {
 }
 
 // ================= 食物分析 =================
+
+function displayFoodResult(result) {
+    const resultContainer = document.getElementById("analysis-result");
+    resultContainer.innerHTML = "<h3>分析結果：</h3>";
+
+    // 顯示分類結果和熱量
+    result.classifications[0].categories.forEach(category => {
+        const foodName = category.categoryName.toLowerCase();
+        const calories = calorieDatabase[foodName] || "未知";
+        resultContainer.innerHTML += `
+            <p>${category.categoryName} (置信度: ${Math.round(category.score * 100)}%)</p>
+            <p>熱量: ${calories} 大卡/100g</p>
+            <hr>
+        `;
+    });
+
+    // 添加份量輸入框
+    resultContainer.innerHTML += `
+        <div class="portion-input">
+            <label for="portion">輸入份量 (g):</label>
+            <input type="number" id="portion" min="1" value="100">
+            <button onclick="calculateCalories()">計算總熱量</button>
+            <p id="total-calories"></p>
+        </div>
+    `;
+}
+
+// 新增的計算熱量函數
+function calculateCalories() {
+    const portion = parseInt(document.getElementById("portion").value) || 100;
+    const foodName = document.getElementById("analysis-result").querySelector("p").textContent.split(" ")[0].toLowerCase();
+    const caloriesPer100g = calorieDatabase[foodName];
+    
+    if (caloriesPer100g) {
+        const totalCalories = Math.round((caloriesPer100g * portion) / 100);
+        document.getElementById("total-calories").textContent = `總熱量: ${totalCalories} 大卡`;
+    } else {
+        document.getElementById("total-calories").textContent = "無法計算熱量（資料庫未包含此食物）";
+    }
+}
+
 async function initFoodCamera() {
     const video = document.getElementById("camera");
     const canvas = document.getElementById("output");
