@@ -337,3 +337,34 @@ button:hover {
     border-radius: 4px;
     cursor: pointer;
 }
+
+/* 食物分析结果样式 */
+.food-item {
+    margin: 10px 0;
+    padding: 10px;
+    background-color: #f0f8ff;
+    border-radius: 5px;
+}
+
+.portion-input {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #fff8dc;
+    border-radius: 5px;
+}
+
+.portion-input button {
+    margin-left: 10px;
+    padding: 5px 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+#total-calories {
+    font-weight: bold;
+    color: #e74c3c;
+    margin-top: 5px;
+}
