@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AI減脂好夥伴</title>
+    <link href="style.css" rel="stylesheet" type="text/css" />
+    <!-- 載入 MediaPipe Tasks Vision -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/vision_bundle.js"></script>
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <h1>AI減脂好夥伴</h1>
+        </div>
+    </header>
+
+    <main>
+        <!-- 首頁 -->
+        <section id="home" class="page active">
+            <div class="welcome-container">
+                <img src="AI減脂好夥伴.png" alt="AI減脂好夥伴" class="hero-image" onclick="showFeatures()">
+                <div id="welcome-message" class="welcome-message"></div>
+            </div>
+        </section>
+
+        <!-- 飲水量頁面 -->
+        <section id="water" class="page">
+            <div class="page-header">
+                <h2>飲水量</h2>
+                <button class="back-btn" onclick="navigateToPage('home')">回到首頁</button>
+            </div>
+            <div class="water-container">
+                <div class="water-progress">
+                    <div id="water-level"></div>
+                </div>
+                <div class="water-controls">
+                    <button id="add-water">新增 200ml</button>
+                    <p id="water-amount">今日飲水量: 0ml</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 食物分析頁面 -->
+        <section id="food" class="page">
+            <div class="page-header">
+                <h2>食物分析</h2>
+                <button class="back-btn" onclick="navigateToPage('home')">回到首頁</button>
+            </div>
+            <div class="camera-container">
+                <video id="camera" autoplay playsinline></video>
+                <canvas id="output"></canvas>
+            </div>
+            <button id="capture">拍攝食物照片</button>
+            <div id="analysis-result"></div>
+        </section>
+
+        <!-- 今日計劃頁面 -->
+        <section id="plan" class="page">
+            <div class="page-header">
+                <h2>今日計劃</h2>
+                <button class="back-btn" onclick="navigateToPage('home')">回到首頁</button>
+            </div>
+            <div class="plan-container">
+                <div class="diet-plan">
+                    <h3>飲食建議</h3>
+                    <div id="diet-suggestions"></div>
+                </div>
+                <div class="exercise-plan">
+                    <h3>運動建議</h3>
+                    <div id="exercise-suggestions"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 運動檢測頁面 -->
+        <section id="exercise" class="page">
+            <div class="page-header">
+                <h2>運動檢測分析</h2>
+                <button class="back-btn" onclick="navigateToPage('home')">回到首頁</button>
+            </div>
+            <div class="exercise-container">
+                <video id="exercise-camera" autoplay playsinline></video>
+                <canvas id="pose-output"></canvas>
+            </div>
+            <button id="start-exercise">開始運動檢測</button>
+            <div id="exercise-feedback"></div>
+        </section>
+    </main>
+
+    <!-- 快速加水按鈕 -->
+    <div class="floating-water-btn" id="quickAddWater">💧</div>
+    <div class="water-achievement" id="waterAchievement">
+        <h3>🎉 恭喜達標！</h3>
+        <p>你今天已經喝滿2000ml水了！繼續保持健康的習慣！</p>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+<footer>
+    <p>&copy; 2025 AI減脂好夥伴. All rights reserved.</p>
+</footer>
+</html>
