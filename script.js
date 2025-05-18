@@ -3,6 +3,20 @@ let waterAmount = 0;
 let foodClassifier;
 let poseDetector;
 
+// 熱量資料庫（單位：大卡/100g）
+const calorieDatabase = {
+    "apple": 52,
+    "banana": 89,
+    "pizza": 266,
+    "hamburger": 295,
+    "rice": 130,
+    "bread": 265,
+    "egg": 155,
+    "chicken": 239,
+    "fish": 206,
+    "salad": 15
+};
+
 // 顯示功能按鈕
 // 飲食和運動建議
 const dietSuggestions = [
