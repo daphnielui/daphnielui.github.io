@@ -1,7 +1,8 @@
 // 全局變量
-let waterAmount = 0;
-let foodClassifier;
-let poseDetector;
+// 在文件最开头添加（替换原来的全局变量声明）
+let vision = null;
+let foodClassifier = null;
+let poseDetector = null;
 
 // 熱量資料庫（單位：大卡/100g）
 const calorieDatabase = {
@@ -110,18 +111,35 @@ function updateWaterUI() {
 
 function displayFoodResult(result) {
     const resultContainer = document.getElementById("analysis-result");
-    resultContainer.innerHTML = "<h3>分析結果：</h3>";
+    if (!result || !result.classifications || result.classifications.length === 0) {
+        resultContainer.innerHTML = "<p>无法识别食物，请尝试拍摄更清晰的照片</p>";
+        return;
+    }
 
-    // 顯示分類結果和熱量
+    resultContainer.innerHTML = "<h3>分析结果：</h3>";
+    
     result.classifications[0].categories.forEach(category => {
         const foodName = category.categoryName.toLowerCase();
         const calories = calorieDatabase[foodName] || "未知";
         resultContainer.innerHTML += `
-            <p>${category.categoryName} (置信度: ${Math.round(category.score * 100)}%)</p>
-            <p>熱量: ${calories} 大卡/100g</p>
+            <div class="food-item">
+                <p>食物：${category.categoryName}</p>
+                <p>置信度：${Math.round(category.score * 100)}%</p>
+                <p>热量：${calories} 大卡/100g</p>
+            </div>
             <hr>
         `;
     });
+
+    resultContainer.innerHTML += `
+        <div class="portion-input">
+            <label for="portion">输入份量 (g):</label>
+            <input type="number" id="portion" min="1" value="100">
+            <button onclick="calculateCalories()">计算总热量</button>
+            <p id="total-calories"></p>
+        </div>
+    `;
+}
 
     // 添加份量輸入框
     resultContainer.innerHTML += `
@@ -184,24 +202,31 @@ async function getNutritionData(foodName) {
 }
 
 async function analyzeFood(canvas) {
-    const loadingDiv = document.getElementById("loading");
-    const resultContainer = document.getElementById("analysis-result");
+    // 确保vision模块已加载
+    if (!vision) {
+        vision = await visionTasks.FilesetResolver.forVisionTasks(
+            "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm"
+        );
+    }
     
-    try {
-        loadingDiv.style.display = "block";
-        resultContainer.innerHTML = "";
+    if (!foodClassifier) {
+        foodClassifier = await visionTasks.ImageClassifier.createFromOptions(vision, {
+            baseOptions: {
+                modelAssetPath: "https://storage.googleapis.com/mediapipe-models/image_classifier/food_classifier/float32/1/food_classifier.tflite",
+            },
+            maxResults: 3,
+        });
+    }
 
-        if (!foodClassifier) {
-            const vision = await VisionTasks.FilesetResolver.forVisionTasks(
-                "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm"
-            );
-            foodClassifier = await VisionTasks.ImageClassifier.createFromOptions(vision, {
-                baseOptions: {
-                    modelAssetPath: "https://storage.googleapis.com/mediapipe-models/image_classifier/food_classifier/float32/1/food_classifier.tflite",
-                },
-                maxResults: 3,
-            });
-        }
+    try {
+        const result = foodClassifier.classify(canvas);
+        displayFoodResult(result);
+    } catch (error) {
+        console.error("食物分析失败:", error);
+        document.getElementById("analysis-result").innerHTML = 
+            "<p>食物分析失败，请重试</p>";
+    }
+}
 
         const result = foodClassifier.classify(canvas);
         const topFood = result.classifications[0].categories[0].categoryName;
