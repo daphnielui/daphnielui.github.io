@@ -116,29 +116,56 @@ async function initFoodCamera() {
     }
 }
 
-async function analyzeFood(canvas) {
-    if (!foodClassifier) {
-        const vision = await VisionTasks.FilesetResolver.forVisionTasks(
-            "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm"
-        );
-        foodClassifier = await VisionTasks.ImageClassifier.createFromOptions(vision, {
-            baseOptions: {
-                modelAssetPath: "https://storage.googleapis.com/mediapipe-models/image_classifier/food_classifier/float32/1/food_classifier.tflite",
-            },
-            maxResults: 3,
-        });
+async function getNutritionData(foodName) {
+    const apiKey = process.env.NUTRITIONIX_API_KEY;
+    try {
+        const response = await fetch(`https://api.nutritionix.com/v1_1/search/${foodName}?results=0:1&fields=item_name,nf_calories&appId=${apiKey}`);
+        const data = await response.json();
+        return data.hits[0]?.fields || null;
+    } catch (error) {
+        console.error("營養資料獲取錯誤:", error);
+        return null;
     }
-
-    const result = foodClassifier.classify(canvas);
-    displayFoodResult(result);
 }
 
-function displayFoodResult(result) {
+async function analyzeFood(canvas) {
+    const loadingDiv = document.getElementById("loading");
     const resultContainer = document.getElementById("analysis-result");
-    resultContainer.innerHTML = "<h3>食物分析結果：</h3>";
-    result.classifications[0].categories.forEach(category => {
-        resultContainer.innerHTML += `<p>${category.categoryName} (${Math.round(category.score * 100)}%)</p>`;
-    });
+    
+    try {
+        loadingDiv.style.display = "block";
+        resultContainer.innerHTML = "";
+
+        if (!foodClassifier) {
+            const vision = await VisionTasks.FilesetResolver.forVisionTasks(
+                "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm"
+            );
+            foodClassifier = await VisionTasks.ImageClassifier.createFromOptions(vision, {
+                baseOptions: {
+                    modelAssetPath: "https://storage.googleapis.com/mediapipe-models/image_classifier/food_classifier/float32/1/food_classifier.tflite",
+                },
+                maxResults: 3,
+            });
+        }
+
+        const result = foodClassifier.classify(canvas);
+        const topFood = result.classifications[0].categories[0].categoryName;
+        const nutrition = await getNutritionData(topFood);
+
+        resultContainer.innerHTML = `
+            <h3>食物分析結果：</h3>
+            <p>食物：${topFood}</p>
+            ${nutrition ? `<p>熱量：${nutrition.nf_calories} 大卡</p>` : ''}
+            <div class="confidence">
+                <p>識別準確度：${Math.round(result.classifications[0].categories[0].score * 100)}%</p>
+            </div>
+        `;
+    } catch (error) {
+        console.error("分析錯誤:", error);
+        resultContainer.innerHTML = "<p class='error'>分析時發生錯誤，請稍後再試。</p>";
+    } finally {
+        loadingDiv.style.display = "none";
+    }
 }
 
 // ================= 運動檢測 =================
