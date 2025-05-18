@@ -167,25 +167,30 @@ function calculateCalories() {
 }
 
 async function initFoodCamera() {
-    const video = document.getElementById("camera");
-    const canvas = document.getElementById("output");
-    const ctx = canvas.getContext("2d");
-
     try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const video = document.getElementById("camera");
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { width: 640, height: 480 } 
+        });
         video.srcObject = stream;
+        
         video.onloadedmetadata = () => {
+            const canvas = document.getElementById("output");
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
+            
+            document.getElementById("capture").addEventListener("click", () => {
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                analyzeFood(canvas);
+            });
         };
-
-        document.getElementById("capture").addEventListener("click", () => {
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            analyzeFood(canvas);
-        });
     } catch (err) {
-        console.error("攝像頭錯誤:", err);
-        alert("無法訪問攝像頭，請確保已授予權限！");
+        console.error("摄像头初始化失败:", err);
+        document.getElementById("analysis-result").innerHTML = `
+            <p class="error">摄像头访问失败: ${err.message}</p>
+            <p>请确保已授予摄像头权限，并刷新页面重试</p>
+        `;
     }
 }
 
